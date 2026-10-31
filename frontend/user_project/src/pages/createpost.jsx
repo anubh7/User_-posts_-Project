@@ -1,65 +1,47 @@
 import axios from 'axios'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+
+import {useNavigate} from 'react-router-dom'
 
 const Createpost = () => {
-    const navigate = useNavigate()
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [selectedFile, setSelectedFile] = useState(null)
-    const [errorMessage, setErrorMessage] = useState('')
+
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
-        setIsSubmitting(true)
-        setErrorMessage('')
+        e.preventDefault();
+        
+        e.target.querySelector('button[type="submit"]').textContent = 'Submitting...'; // Change button text to "Submitting..." when the form is submitted
 
-        const formData = new FormData(e.target)
 
-        try {
-            const response = await axios.post('http://localhost:3000/create-posts', formData)
-            console.log('POST /create-posts response:', response.data)
-            e.target.reset()
-            setSelectedFile(null)
-            navigate('/feed')
-        } catch (error) {
-            console.error('POST /create-posts failed:', error)
-            setErrorMessage('Unable to publish your post. Please try again.')
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
+        const formData = new FormData(e.target); // a formdata object is created from the form element. This object contains all the form data in key-value pairs, where the keys are the names of the form fields and the values are the values entered by the user.
 
-    return (
-        <section className='create-post-section'>
-            <div className='create-post-card'>
-                <p className='eyebrow'>Share an update</p>
-                <h1>Create a post</h1>
-                <p className='form-intro'>Add an image and a caption to share something with your community.</p>
+        const response = await axios.post('http://localhost:3000/create-posts', formData)
 
-                <form onSubmit={handleSubmit}>
-                    <label htmlFor='image'>Image</label>
-                    <input
-                        id='image'
-                        type='file'
-                        name='image'
-                        accept='image/*'
-                        onChange={(event) => setSelectedFile(event.target.files[0] ?? null)}
-                        required
-                    />
-                    {selectedFile && <span className='file-name'>{selectedFile.name}</span>}
+        const data=await response.data
 
-                    <label htmlFor='caption'>Caption</label>
-                    <textarea id='caption' name='caption' placeholder='What would you like to share?' required />
+        console.log('POST /create-posts response:', data);
 
-                    {errorMessage && <p className='form-error' role='alert'>{errorMessage}</p>}
+        e.target.reset(); // Reset the form fields after successful submission
 
-                    <button type='submit' disabled={isSubmitting}>
-                        {isSubmitting ? 'Submitting...' : 'Publish post'}
-                    </button>
-                </form>
-            </div>
-        </section>
-    )
+        e.target.querySelector('button[type="submit"]').textContent = 'Submit'; // Change button text back to "Submit" after successful submission
+        navigate('/feed'); // Navigate to the posts page after successful submission
+    };
+
+  return (
+    <section className='create-post-section'>
+        <h1>Create post</h1>
+
+        <form onSubmit={handleSubmit}>
+            <input type='file' name='image' accept='image' />
+            <input type='text' name='caption' placeholder='Enter a caption' required />
+            <button type='submit'>Submit</button>
+        </form>
+
+
+
+
+
+    </section>
+  )
 }
 
 export default Createpost
